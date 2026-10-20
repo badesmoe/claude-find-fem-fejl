@@ -1,7 +1,7 @@
-const app = vue.createApp({
+const app = Vue.createApp({
     data() {
         return {
-            iintro: 'Welcome to my Vue template',
+            intro: 'Welcome to my Vue template',
         }
     },
     methods: {
