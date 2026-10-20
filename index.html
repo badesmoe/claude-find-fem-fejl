@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="da">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vue Template</title>
     <!-- Import Styles -->
     <link rel="stylesheet" href="./css/styles.css" />
@@ -9,11 +10,202 @@
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
   </head>
   <body>
-    <div id="app">
+    <!-- v-cloak: skjuler {{ }} indtil Vue er færdig med at loade -->
+    <div id="app" v-cloak>
       <div class="nav-bar"></div>
 
       <h1>{{ intro }}</h1>
-      
+
+      <!-- ========== 1. Interpolation, v-text, v-html, v-once, v-pre ========== -->
+      <section>
+        <h2>1. Tekst & HTML</h2>
+        <p>Interpolation: {{ message }}</p>
+        <p>Udtryk virker også: {{ message.toUpperCase() }} – {{ counter * 2 }}</p>
+        <p>Computed (baglæns): {{ reversedMessage }}</p>
+        <p v-text="'v-text: ' + message"></p>
+        <p v-html="rawHtml"></p>
+        <p v-once>v-once (opdateres aldrig): {{ message }}</p>
+        <p v-pre>v-pre (kompileres ikke): {{ message }}</p>
+        <input type="text" v-model="message" />
+      </section>
+
+      <!-- ========== 2. v-bind ========== -->
+      <section>
+        <h2>2. v-bind (kort: <code>:</code>)</h2>
+        <img :src="imageUrl" alt="Vue logo" width="60" />
+        <p><a v-bind:href="linkUrl" target="_blank">Link via v-bind:href</a></p>
+        <button :disabled="isDisabled">Jeg er {{ isDisabled ? 'disabled' : 'aktiv' }}</button>
+        <label><input type="checkbox" v-model="isDisabled" /> Disable knappen</label>
+      </section>
+
+      <!-- ========== 3. v-on + modifiers ========== -->
+      <section>
+        <h2>3. v-on (kort: <code>@</code>)</h2>
+        <p>Counter: {{ counter }}</p>
+        <button @click="increment">+1 (metode)</button>
+        <button @click="counter--">-1 (inline)</button>
+        <button @click="counter = 0">Nulstil</button>
+        <button @click="greet">Hils (med event-objekt)</button>
+        <button @dblclick="counter += 10">Dobbeltklik: +10</button>
+
+        <!-- Modifiers -->
+        <form @submit.prevent="show('Form sendt uden reload (.prevent)')">
+          <input type="text" placeholder="Tryk Enter for +1" @keyup.enter="increment" />
+          <button type="submit">Submit</button>
+        </form>
+        <div @click="show('Ydre div')" class="box">
+          Klik på boksen
+          <button @click.stop="show('Kun knappen (.stop)')">Klik (.stop)</button>
+          <button @click.stop.once="counter += 100">Kun én gang (.once): +100</button>
+        </div>
+      </section>
+
+      <!-- ========== 4. v-model ========== -->
+      <section>
+        <h2>4. v-model (two-way binding)</h2>
+        <p>
+          <input type="text" v-model.trim="name" placeholder="Dit navn (.trim)" />
+          → {{ name }}
+        </p>
+        <p>
+          <input type="number" v-model.number="age" /> (.number) → {{ age }} ({{ typeof age }})
+        </p>
+        <p>
+          <label><input type="checkbox" v-model="agree" /> Jeg accepterer</label>
+          → {{ agree }}
+        </p>
+        <p>
+          Farve:
+          <label><input type="radio" value="red" v-model="color" /> Rød</label>
+          <label><input type="radio" value="blue" v-model="color" /> Blå</label>
+          <label><input type="radio" value="green" v-model="color" /> Grøn</label>
+          → <span :style="{ color: color }">{{ color }}</span>
+        </p>
+        <p>
+          <select v-model="fruit">
+            <option disabled value="">Vælg frugt</option>
+            <option>Æble</option>
+            <option>Banan</option>
+            <option>Pære</option>
+          </select>
+          → {{ fruit }}
+        </p>
+        <p>
+          Hobbyer:
+          <label><input type="checkbox" value="Kode" v-model="hobbies" /> Kode</label>
+          <label><input type="checkbox" value="Musik" v-model="hobbies" /> Musik</label>
+          <label><input type="checkbox" value="Sport" v-model="hobbies" /> Sport</label>
+          → {{ hobbies }}
+        </p>
+        <p>
+          <input type="text" v-model.lazy="message" /> (.lazy opdaterer først ved blur/enter)
+        </p>
+      </section>
+
+      <!-- ========== 5. v-if / v-else-if / v-else / v-show ========== -->
+      <section>
+        <h2>5. v-if og v-show</h2>
+        <input type="range" min="0" max="100" v-model.number="score" /> Score: {{ score }}
+        <p v-if="score >= 90">🏆 Fremragende (A)</p>
+        <p v-else-if="score >= 70">👍 Godt (B)</p>
+        <p v-else-if="score >= 50">🙂 Bestået (C)</p>
+        <p v-else>😬 Ikke bestået (F)</p>
+        <p>Computed grade: {{ grade }}</p>
+
+        <button @click="showBox = !showBox">Toggle</button>
+        <div v-show="showBox" class="box">v-show: skjules med CSS (display: none)</div>
+        <div v-if="showBox" class="box">v-if: fjernes helt fra DOM'en</div>
+
+        <!-- <template> grupperer uden at lave et ekstra element -->
+        <template v-if="agree">
+          <p>Du har accepteret (fra sektion 4).</p>
+          <p>&lt;template&gt; grupperer flere elementer.</p>
+        </template>
+      </section>
+
+      <!-- ========== 6. v-for ========== -->
+      <section>
+        <h2>6. v-for</h2>
+        <form @submit.prevent="addTodo">
+          <input type="text" v-model="newTodo" placeholder="Ny todo" />
+          <button type="submit">Tilføj</button>
+        </form>
+        <p>{{ remainingTodos }} af {{ todos.length }} mangler</p>
+        <ul>
+          <!-- Brug altid :key med et unikt id -->
+          <li v-for="(todo, index) in todos" :key="todo.id">
+            <input type="checkbox" v-model="todo.done" />
+            <span :class="{ done: todo.done }">{{ index + 1 }}. {{ todo.text }}</span>
+            <button @click="removeTodo(todo.id)">✕</button>
+          </li>
+        </ul>
+        <p v-if="todos.length === 0">Ingen todos 🎉</p>
+
+        <h3>Over et objekt</h3>
+        <ul>
+          <li v-for="(value, key) in person" :key="key">{{ key }}: {{ value }}</li>
+        </ul>
+
+        <h3>Over et tal</h3>
+        <span v-for="n in 5" :key="n">{{ n }} </span>
+      </section>
+
+      <!-- ========== 7. Class & style binding ========== -->
+      <section>
+        <h2>7. :class og :style</h2>
+        <label><input type="checkbox" v-model="isActive" /> isActive</label>
+        <label><input type="checkbox" v-model="hasError" /> hasError</label>
+        <div class="box" :class="{ active: isActive, 'text-danger': hasError }">Objekt-syntaks</div>
+        <div class="box" :class="[isActive ? 'active' : '', { 'text-danger': hasError }]">Array-syntaks</div>
+        <div class="box" :class="boxClasses">Via computed</div>
+
+        <p>
+          <input type="range" min="10" max="40" v-model.number="fontSize" />
+          <span :style="{ fontSize: fontSize + 'px', color: color }">Størrelse {{ fontSize }}px</span>
+        </p>
+      </section>
+
+      <!-- ========== 8. Try / catch ========== -->
+      <section>
+        <h2>8. try / catch / finally</h2>
+
+        <h3>Fetch med async/await</h3>
+        <button @click="fetchUsers()" :disabled="loading">Hent brugere</button>
+        <button @click="fetchWithError" :disabled="loading">Hent med fejl (404)</button>
+        <p v-if="loading">Henter…</p>
+        <p v-else-if="error" class="error">⚠️ {{ error }}</p>
+        <ul v-else>
+          <li v-for="user in users" :key="user.id">{{ user.name }} – {{ user.email }}</li>
+        </ul>
+
+        <h3>JSON.parse</h3>
+        <textarea v-model="jsonInput" rows="3"></textarea>
+        <button @click="parseJson">Parse JSON</button>
+        <p v-if="jsonError" class="error">⚠️ {{ jsonError }}</p>
+        <pre v-if="jsonResult">{{ jsonResult }}</pre>
+
+        <h3>Egen fejl med throw</h3>
+        <button @click="divide(10, 2)">10 / 2</button>
+        <button @click="divide(10, 0)">10 / 0</button>
+      </section>
+
+      <!-- ========== 9. Watch ========== -->
+      <section>
+        <h2>9. watch</h2>
+        <input type="text" v-model="searchText" placeholder="Skriv noget" />
+        <ul>
+          <li v-for="(entry, i) in searchLog" :key="i">{{ entry }}</li>
+        </ul>
+      </section>
+
+      <!-- ========== 10. Komponenter ========== -->
+      <section>
+        <h2>10. Komponenter, props, emits & slots</h2>
+        <info-card title="Kort 1" :count="counter" @clicked="onChildClicked"></info-card>
+        <info-card title="Kort 2" :count="todos.length" @clicked="onChildClicked">
+          <p>Dette er slot-indhold sendt ind fra forælderen.</p>
+        </info-card>
+      </section>
     </div>
 
     <!-- Import App -->
